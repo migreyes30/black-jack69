@@ -1,29 +1,19 @@
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-
-import cardgame.Card;
+import javax.swing.*;
+import cardgame.*;
 
 public class BlackJack extends JFrame {
 
-	private Card faceDownCard;
 	private JPanel playerPanel, dealerPanel;
-	private Card[] playerCards, dealerCards;
 	private JLabel betSizeLabel;
 	private JLabel myMoneyLabel;
 	private JPanel messagesPanel;
 
-	private Player player = new Player();
+	private Player player;
+	private Dealer dealer;
+	private Deck deck;
 
 	private ButtonManager bmgr;
 
@@ -40,36 +30,29 @@ public class BlackJack extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		JLayeredPane gameTable = new JLayeredPane();
+		initializeDeck();
+		player = new Player();
+		dealer = new Dealer();
 
 		JLabel bg = new JLabel(new ImageIcon("images/bg.jpg"));
 		bg.setBounds(0, 0, 600, 415);
 
-		playerCards = new Card[5];
-		dealerCards = new Card[5];
-		faceDownCard = new Card(null, null, new ImageIcon("images/b.gif"));
+		
 		initializeCards();
 
-		playerPanel = new JPanel();
+		
 		dealerPanel = new JPanel();
-
-		for (Card n : dealerCards) {
-			dealerPanel.add(new JLabel(n.getCardImage()));
-		}
 		dealerPanel.setOpaque(false);
 		dealerPanel.setBounds(45, 30, 500, 100);
-
-		// playerPanel.add(playerLabel);
-		for (Card n : playerCards) {
-			playerPanel.add(new JLabel(n.getCardImage()));
-		}
+		
+		playerPanel = new JPanel();
 		playerPanel.setOpaque(false);
 		playerPanel.setBounds(45, 190, 500, 100);
 
 		createButtons();
 
-		betSizeLabel = new JLabel();
+		betSizeLabel = new JLabel(" $ " + BJContext.getMinBetValue());
 		// betSizeLabel.setForeground(Color.CYAN);
-		betSizeLabel.setText(" $ " + BJContext.getMinBetValue());
 		betSizeLabel.setBounds(12, 198, 87, 25);
 		betSizeLabel.setOpaque(true);
 
@@ -79,8 +62,7 @@ public class BlackJack extends JFrame {
 		betLabel.setBounds(12, 173, 87, 25);
 		betLabel.setOpaque(false);
 
-		myMoneyLabel = new JLabel();
-		myMoneyLabel.setText(" $ " + BJContext.getInitialMoney());
+		myMoneyLabel = new JLabel(" $ " + BJContext.getInitialMoney());
 		// myMoneyLabel.setForeground(Color.YELLOW);
 		myMoneyLabel.setBounds(300, 332, 90, 25);
 		myMoneyLabel.setOpaque(true);
@@ -96,19 +78,19 @@ public class BlackJack extends JFrame {
 		messagesPanel.setBounds(205, 110, 175, 175);
 		messagesPanel.setOpaque(false);
 
-		gameTable.add(messagesPanel, 1);
-		gameTable.add(dealerPanel, 2);
-		gameTable.add(playerPanel, 3);
-		gameTable.add(upBetButton, 4);
-		gameTable.add(downBetButton, 5);
-		gameTable.add(hitButton, 6);
-		gameTable.add(standButton, 7);
-		gameTable.add(startButton, 8);
-		gameTable.add(betSizeLabel, 9);
-		gameTable.add(myMoneyLabel, 10);
-		gameTable.add(betLabel, 11);
-		gameTable.add(moneyLabel, 12);
-		gameTable.add(bg, 13);
+		gameTable.add(messagesPanel);
+		gameTable.add(dealerPanel);
+		gameTable.add(playerPanel);
+		gameTable.add(upBetButton);
+		gameTable.add(downBetButton);
+		gameTable.add(hitButton);
+		gameTable.add(standButton);
+		gameTable.add(startButton);
+		gameTable.add(betSizeLabel);
+		gameTable.add(myMoneyLabel);
+		gameTable.add(betLabel);
+		gameTable.add(moneyLabel);
+		gameTable.add(bg);
 		this.add(gameTable);
 	}
 
@@ -118,6 +100,7 @@ public class BlackJack extends JFrame {
 		upBetButton.setBounds(10, 312, 90, 25);
 		downBetButton = new JButton("Down Bet");
 		downBetButton.setBounds(10, 340, 90, 25);
+		downBetButton.setEnabled(false);
 		hitButton = new JButton("Hit");
 		hitButton.setBounds(105, 332, 90, 25);
 		hitButton.setEnabled(false);
@@ -133,15 +116,13 @@ public class BlackJack extends JFrame {
 		downBetButton.addActionListener(bmgr);
 		hitButton.addActionListener(bmgr);
 		standButton.addActionListener(bmgr);
-
+		startButton.addActionListener(bmgr);
 	}
 
 	private void initializeCards() {
 		for (int i = 0; i < 5; i++) {
-			playerCards[i] = faceDownCard;
-			dealerCards[i] = faceDownCard;
-		}
 
+		}
 	}
 
 	public static void main(String[] args) {
@@ -157,31 +138,101 @@ public class BlackJack extends JFrame {
 		betSizeLabel.setText(" $ " + player.getBet());
 		myMoneyLabel.setText(" $ " + player.getMoney());
 	}
+	
+	// Create the Deck of the Table
+	private void initializeDeck() {
+		deck = new Deck();
+		for (int i = 0; i < 6; i++) {
+			for (Suit s : Suit.VALUES) {
+				for (Rank r : Rank.VALUES) {
+					Card c = new Card(s, r, new ImageIcon("images/"
+							+ r.getSymbol() + s.getSymbol() + ".gif"));
+					deck.addCard(c);
+				}
+			}
+		}
+		deck.shuffle();
+	}
+	
+	private void dealCards(){
+		
+		dealCard(playerPanel, true);
+		dealCard(dealerPanel, true);
+		dealCard(playerPanel, true);
+		dealCard(dealerPanel, false);
+		
+	}
+	
+	private void dealCard(JPanel where, boolean faceup){
+		
+		Card dealtCard = deck.dealCard();
+		JLabel cardLabel;
+		
+		if (where == playerPanel){
+			player.hit(dealtCard);
+		} else {
+			dealer.hit(dealtCard);
+		}
+
+		if (faceup){
+			cardLabel = new JLabel(dealtCard.getCardImage());
+		} else {
+			cardLabel = new JLabel(BJContext.getFaceDownCard());
+		}
+		where.add(cardLabel);
+		
+	}
 
 	private class ButtonManager implements ActionListener {
 
+		private boolean upEnabled = false;
+		private boolean downEnabled = true;
+		
 		public void actionPerformed(ActionEvent e) {
 			
 			// Up Bet button pressed
 			if (e.getSource().equals(upBetButton)) {
 				player.increaseBet();
-				downBetButton.setEnabled(true);
+				downEnabled = true;
+				downBetButton.setEnabled(downEnabled);
 				refreshCoinValues();
 
 				if (player.getBet() == BJContext.getMaxBetValue()) {
-					upBetButton.setEnabled(false);
+					upEnabled = false;
+					upBetButton.setEnabled(upEnabled);
 				}
 			}
 
 			// Down Bet button pressed
 			else if (e.getSource() == downBetButton) {
 				player.decreaseBet();
-				upBetButton.setEnabled(true);
+				upEnabled = true;
+				upBetButton.setEnabled(upEnabled);
 				refreshCoinValues();
 
 				if (player.getBet() == BJContext.getMinBetValue()) {
-					downBetButton.setEnabled(false);
+					downEnabled = false;
+					downBetButton.setEnabled(downEnabled);
 				}
+			}
+			
+			// Start button pressed
+			else if (e.getSource() == startButton) {
+				upBetButton.setEnabled(false);
+				downBetButton.setEnabled(false);
+				startButton.setVisible(false);
+				messagesPanel.setVisible(false);
+				
+				hitButton.setEnabled(true);
+				standButton.setEnabled(true);
+				
+				dealCards();
+				
+			} // Hit button pressed
+			else if (e.getSource() == hitButton) {
+				
+				dealCard(playerPanel, true);
+				playerPanel.doLayout();
 			}
 
 		}
