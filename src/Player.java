@@ -13,8 +13,8 @@ public class Player {
 	
 	Player(){
 		hand = new ArrayList<Card>();
-		money = 1000;
-		bet = 0;
+		money = BJContext.getInitialMoney();
+		bet = BJContext.getMinBetValue();
 	}
 	
 	public void hitCard(Card actualCard){
