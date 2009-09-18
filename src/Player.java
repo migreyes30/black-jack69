@@ -1,39 +1,16 @@
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import cardgame.Card;
-import cardgame.Rank;
-import cardgame.Suit;
 
-public class Player {
+public class Player extends BlackJackPlayer{
 	
-	private ArrayList<Card> hand;
 	
 	private int money, bet;
 	
 	Player(){
-		hand = new ArrayList<Card>();
+		super();
 		money = BJContext.getInitialMoney();
 		bet = BJContext.getMinBetValue();
 	}
 	
-	public void hitCard(Card actualCard){
-		if (hand.size() < 5){
-			hand.add(actualCard);
-		}
-	}
-	
-	public void cleanHand(){
-		hand = new ArrayList<Card>();
-	}
-	/*
-	public int scoreKingHigh(){
-		for (Card c: hand){
-			
-		}
-		return bet;
-	}
-	*/
 	public int getMoney(){
 		return money;
 	}
@@ -43,8 +20,10 @@ public class Player {
 	}
 	
 	public void increaseBet(){
-		bet ++;
-		money --;
+		if (money > 0) {
+			bet ++;
+			money --;
+		}
 	}
 	
 	public void decreaseBet(){
