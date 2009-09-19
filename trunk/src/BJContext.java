@@ -4,11 +4,17 @@ public class BJContext {
 
 	private static int MIN_BET_VALUE = 5;
 	private static int MAX_BET_VALUE = 500;
-
 	private static int INITIAL_MONEY = 1000;
-
 	private static ImageIcon FACE_DOWN_CARD = new ImageIcon("images/b.gif");
 
+
+	public static int STANDBY = 0;
+	public static int LOSE = 1;
+	public static int PLAYING = 2;
+	public static int WIN = 3;
+	
+	
+	
 	public static int getMinBetValue() {
 		return MIN_BET_VALUE;
 	}
