@@ -37,14 +37,12 @@ public class BlackJack extends JFrame {
 		JLabel bg = new JLabel(new ImageIcon("images/bg.jpg"));
 		bg.setBounds(0, 0, 600, 415);
 
-		
 		initializeCards();
 
-		
 		dealerPanel = new JPanel();
 		dealerPanel.setOpaque(false);
 		dealerPanel.setBounds(45, 30, 500, 100);
-		
+
 		playerPanel = new JPanel();
 		playerPanel.setOpaque(false);
 		playerPanel.setBounds(45, 190, 500, 100);
@@ -107,9 +105,9 @@ public class BlackJack extends JFrame {
 		standButton = new JButton("Stand");
 		standButton.setBounds(200, 332, 90, 25);
 		standButton.setEnabled(false);
-		
+
 		startButton = new JButton("Start");
-		startButton.setBounds(250,190,90,25);
+		startButton.setBounds(250, 190, 90, 25);
 
 		bmgr = new ButtonManager();
 		upBetButton.addActionListener(bmgr);
@@ -138,7 +136,7 @@ public class BlackJack extends JFrame {
 		betSizeLabel.setText(" $ " + player.getBet());
 		myMoneyLabel.setText(" $ " + player.getMoney());
 	}
-	
+
 	// Create the Deck of the Table
 	private void initializeDeck() {
 		deck = new Deck();
@@ -153,33 +151,44 @@ public class BlackJack extends JFrame {
 		}
 		deck.shuffle();
 	}
-	
-	private void dealCards(){
-		
+
+	private void dealCards() {
+
 		dealCard(playerPanel, true);
 		dealCard(dealerPanel, true);
 		dealCard(playerPanel, true);
 		dealCard(dealerPanel, false);
 		
-	}
-	
-	private void dealCard(JPanel where, boolean faceup){
+		evaluateNaturals();
 		
+	}
+
+	private void dealCard(JPanel where, boolean faceup) {
+
 		Card dealtCard = deck.dealCard();
 		JLabel cardLabel;
-		
-		if (where == playerPanel){
+
+		if (where == playerPanel) {
 			player.hit(dealtCard);
 		} else {
 			dealer.hit(dealtCard);
 		}
 
-		if (faceup){
+		if (faceup) {
 			cardLabel = new JLabel(dealtCard.getCardImage());
 		} else {
 			cardLabel = new JLabel(BJContext.getFaceDownCard());
 		}
 		where.add(cardLabel);
+	}
+	
+	private void evaluateNaturals(){
+		
+		//Player won and dealer didn't
+		if (player.getStatus() > dealer.getStatus()){
+			player.setWinMoney((int)(player.getBet()*1.5));
+			myMoneyLabel.setText(" $ " + player.getMoney());
+		}
 		
 	}
 
@@ -187,7 +196,7 @@ public class BlackJack extends JFrame {
 
 		private boolean upEnabled = false;
 		private boolean downEnabled = true;
-		
+
 		public void actionPerformed(ActionEvent e) {
 			
 			// Up Bet button pressed
@@ -226,14 +235,28 @@ public class BlackJack extends JFrame {
 				hitButton.setEnabled(true);
 				standButton.setEnabled(true);
 				
+				player.enterGame();
+				dealer.enterGame();
+				
 				dealCards();
+				
 				
 			} // Hit button pressed
 			else if (e.getSource() == hitButton) {
 				
 				dealCard(playerPanel, true);
-				playerPanel.doLayout();
+				
+				if(player.getStatus() == BJContext.WIN 
+						|| player.getStatus() == BJContext.LOSE){
+					
+					
+					
+				}
+				
 			}
+			
+			
+			playerPanel.doLayout();
 
 		}
 	}
